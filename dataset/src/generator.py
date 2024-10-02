@@ -114,6 +114,21 @@ def save_leaf_nodes(leaf_nodes, leaf_node_file):
         json.dump(leaf_nodes, file, indent=4)
     print(f"Saved {len(leaf_nodes)} leaf nodes for future use in: {leaf_node_file}.")
 
+# Function to save edges in JSON format
+def save_edges_to_json(graph, json_file):
+    if os.path.exists(json_file):
+        with open(json_file, 'r', encoding='utf-8') as file:
+            existing_edges = json.load(file)
+    else:
+        existing_edges = []
+
+    existing_edges.extend(graph)
+
+    with open(json_file, 'w', encoding='utf-8') as file:
+        json.dump(existing_edges, file, indent=4)
+
+    print(f"Saved {len(graph)} edges to {json_file}.")
+
 # Thread function to process a single article and its links
 def process_article(article_info, visited, graph, max_new_topics, queue, new_topic_counter, leaf_nodes):
     # Debugging: print the article_info to check its structure
@@ -238,13 +253,16 @@ def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topic
 
     print(f"Saved {len(graph)} edges to {output_csv}.")
 
+    # Save edges in JSON format
+    save_edges_to_json(graph, COMBINED_JSON_FILE)
+
     # Save leaf nodes for future continuation
     save_leaf_nodes(leaf_nodes, leaf_node_file)
 
 seed_topics = ["Technology", "Science", "Mathematics", "History"]
 
 # Set max_new_topics to ensure you want 10 for each topic
-max_new_topics_per_topic = 1000
+max_new_topics_per_topic = 10
 
 start_time = time.time()  # Track start time
 
