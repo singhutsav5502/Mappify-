@@ -10,9 +10,14 @@ import multiprocessing  # To use system core count
 # Thread-safe lock for shared data structures
 lock = Lock()
 
+# Base directory for dataset (assuming script runs from src/)
+BASE_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'dataset')
 # Base file names
+# Base file names (under dataset directory)
 LEAF_NODE_BASE = "leaf_nodes_"
+LEAF_NODE_BASE = os.path.join(BASE_DIR, "leaf_nodes_")
 COMBINED_JSON_FILE = "combined_topics.json"
+COMBINED_JSON_FILE = os.path.join(BASE_DIR, "combined_topics.json")
 
 # Function to get links from a Wikipedia page using the Wikipedia API
 def get_links(article_title):
@@ -206,6 +211,8 @@ def process_article(article_info, visited, graph, max_new_topics, queue, new_top
 
 # Function to build the graph from a seed topic and store in a single CSV/JSON
 def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topics_combined.csv"):
+    # Adjust the CSV output file path to store in the dataset folder
+    output_csv = os.path.join(BASE_DIR, output_csv)
     print(f"Building topic graph starting from seed topic: {seed_topic} (Depth: {depth}, Max new topics: {max_new_topics})")
     
     leaf_node_file = f"{LEAF_NODE_BASE}{seed_topic.replace(' ', '_')}.json"  # Unique file for each seed topic
@@ -266,11 +273,10 @@ def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topic
     # Save leaf nodes for future continuation
     save_leaf_nodes(leaf_nodes, leaf_node_file)
 
-# seed_topics = ["Technology", "Science", "Mathematics", "History", "Arts", "Humanities", "Philosophy", "Politics" ]
-seed_topics = ["Technology", "Science" ]
+seed_topics = ["Technology", "Science", "Mathematics", "History", "Arts", "Humanities", "Philosophy", "Politics" ]
 
 # Set max_new_topics to ensure you want 10 for each topic
-max_new_topics_per_topic = 10000
+max_new_topics_per_topic = 1
 
 start_time = time.time()  # Track start time
 
