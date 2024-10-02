@@ -3,6 +3,16 @@ import csv
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+import multiprocessing  # To use system core count
+
+# Thread-safe lock for shared data structures
+lock = Lock()
+
+# Base file names
+LEAF_NODE_BASE = "leaf_nodes_"
+COMBINED_JSON_FILE = "combined_topics.json"
 
 # Function to get links from a Wikipedia page using the Wikipedia API
 def get_links(article_title):
@@ -37,7 +47,7 @@ def get_links(article_title):
         print(f"Error fetching links from {article_title}: {e}")
         return []
 
-# Function to check if a page belongs to relevant categories (filter out "People", etc.)
+# Function to check if a page belongs to relevant categories (relaxed criteria)
 def is_valid_topic(article_title):
     print(f"Checking categories for: {article_title}")
     
@@ -58,10 +68,13 @@ def is_valid_topic(article_title):
         for page_id, page_info in pages_category.items():
             if 'categories' in page_info:
                 categories = [category['title'] for category in page_info['categories']]
-                # Exclude pages with irrelevant categories
-                if not any("People" in cat or "Biography" in cat for cat in categories):
-                    print(f"Article '{article_title}' is a valid topic.")
+                # Allow most topics, relaxing the criteria
+                if "People" in categories or "Biography" in categories:
+                    print(f"Article '{article_title}' is considered valid, even though it's about a person.")
                     return True
+
+                print(f"Article '{article_title}' is a valid topic by default.")
+                return True
         
         print(f"Article '{article_title}' is NOT a valid topic.")
         return False
@@ -84,81 +97,160 @@ def load_existing_graph(output_csv):
     print(f"Loaded {len(existing_graph)} topics from the existing dataset.")
     return existing_graph
 
-# Function to build the graph from a seed topic and store in a single CSV/JSON
-def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topics_combined.csv", output_json="topics_combined.json"):
-    print(f"Building topic graph starting from seed topic: {seed_topic} (Depth: {depth}, Max new topics: {max_new_topics})")
-    
-    existing_graph = load_existing_graph(output_csv)  # Load existing data
-    queue = [(seed_topic, 0)]  # Track both the article and its depth
-    visited = set(existing_graph)  # Track visited nodes (including previously saved ones)
-    new_topics_count = 0
-    graph = []
+# Function to load previously saved leaf nodes
+def load_leaf_nodes(leaf_node_file):
+    if os.path.exists(leaf_node_file):
+        with open(leaf_node_file, 'r', encoding='utf-8') as file:
+            leaf_nodes = json.load(file)
+        print(f"Loaded {len(leaf_nodes)} leaf nodes from the file: {leaf_node_file}.")
+        return leaf_nodes
+    else:
+        print("No leaf nodes found. Starting fresh.")
+        return []
 
-    while queue and new_topics_count < max_new_topics:
-        current_article, current_depth = queue.pop(0)
-        
-        if current_article in visited or current_depth >= depth:
-            continue
-        
+# Function to save leaf nodes for future continuation
+def save_leaf_nodes(leaf_nodes, leaf_node_file):
+    with open(leaf_node_file, 'w', encoding='utf-8') as file:
+        json.dump(leaf_nodes, file, indent=4)
+    print(f"Saved {len(leaf_nodes)} leaf nodes for future use in: {leaf_node_file}.")
+
+# Thread function to process a single article and its links
+def process_article(article_info, visited, graph, max_new_topics, queue, new_topic_counter, leaf_nodes):
+    # Debugging: print the article_info to check its structure
+    print(f"Processing article info: {article_info}")
+
+    # Ensure we unpack only if there are exactly three elements
+    if len(article_info) != 3:
+        print(f"Invalid article_info structure: {article_info}")
+        return
+    
+    current_article, current_depth, depth = article_info
+
+    # Check if current_depth is an integer
+    if not isinstance(current_depth, int):
+        print(f"current_depth is not an integer: {current_depth}")
+        return
+
+    # If current_depth is >= depth or max new topics reached, save as leaf node
+    if current_depth >= depth or new_topic_counter["count"] >= max_new_topics:
+        with lock:
+            leaf_nodes.append(article_info)  # Save the current article as a leaf node
+        return
+    
+    with lock:
         visited.add(current_article)
-        
-        # Get valid links
-        links = get_links(current_article)
-        valid_links = [link for link in links if is_valid_topic(link)]
-        
-        # Add edges to the graph and queue for deeper exploration
+
+    # Get valid links
+    links = get_links(current_article)
+    
+    # Limit to only the first x valid links
+    valid_links = []
+    additional_links = []
+
+    for link in links:
+        if len(valid_links) < max_new_topics:  # Check validity for only the first x links
+            if is_valid_topic(link):
+                valid_links.append(link)
+        else:
+            additional_links.append(link)  # Any extra links are treated as additional links
+
+    # If there are no valid links, this is a leaf node
+    if not valid_links:
+        with lock:
+            leaf_nodes.append(article_info)  # Save the current article as a leaf node
+        return
+
+    # Add edges to the graph
+    with lock:
         for link in valid_links:
-            if new_topics_count >= max_new_topics:
-                print("Reached the maximum number of new topics. Stopping...")
-                break
-            
-            if link not in visited:
+            # Add an edge from the current article to the link
+            if link in visited:
+                print(f"Adding edge (existing): {current_article} -> {link} (already visited)")
+                graph.append({"source": current_article, "target": link})  # Edge to an already visited article
+            else:
+                if new_topic_counter["count"] >= max_new_topics:
+                    print("Reached the maximum number of new topics. Stopping...")
+                    # Add the remaining topics as leaf nodes
+                    leaf_nodes.extend([(link, current_depth + 1, depth) for link in additional_links])  # Add additional links as leaf nodes
+                    return
+
                 print(f"Adding edge: {current_article} -> {link}")
                 graph.append({"source": current_article, "target": link})
-                queue.append((link, current_depth + 1))
-                new_topics_count += 1  # Increment new topics count
-    
-    # Save the graph to CSV
-    print(f"Saving graph to CSV: {output_csv}")
-    try:
-        with open(output_csv, mode='a', newline='', encoding='utf-8') as csv_file:  # Use append mode
-            fieldnames = ['source', 'target']
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-            
-            if os.stat(output_csv).st_size == 0:  # Write header only if file is empty
-                writer.writeheader()
-            
-            for edge in graph:
-                writer.writerow(edge)
-    except Exception as e:
-        print(f"Error saving to CSV: {e}")
-    
-    # Save the graph to JSON
-    print(f"Saving graph to JSON: {output_json}")
-    try:
-        if os.path.exists(output_json):
-            with open(output_json, mode='r', encoding='utf-8') as json_file:
-                existing_data = json.load(json_file)
-        else:
-            existing_data = []
-        
-        existing_data.extend(graph)
-        
-        with open(output_json, mode='w', encoding='utf-8') as json_file:
-            json.dump(existing_data, json_file, indent=4)
-    except Exception as e:
-        print(f"Error saving to JSON: {e}")
-    
-    print(f"Graph successfully saved to {output_csv} and {output_json}")
+                queue.append((link, current_depth + 1, depth))  # Add the next article with incremented depth
+                new_topic_counter["count"] += 1  # Increment the new topic counter for new topics
 
-# Start the process with a seed topic (broad range)
+        # Add additional links as leaf nodes
+        leaf_nodes.extend([(link, current_depth + 1, depth) for link in additional_links])  # Ensure additional links match the tuple structure
+
+# Function to build the graph from a seed topic and store in a single CSV/JSON
+def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topics_combined.csv"):
+    print(f"Building topic graph starting from seed topic: {seed_topic} (Depth: {depth}, Max new topics: {max_new_topics})")
+    
+    leaf_node_file = f"{LEAF_NODE_BASE}{seed_topic.replace(' ', '_')}.json"  # Unique file for each seed topic
+    existing_graph = load_existing_graph(output_csv)  # Load existing data
+    leaf_nodes = load_leaf_nodes(leaf_node_file)  # Load previously saved leaf nodes (if any)
+    
+    # If there are no saved leaf nodes, start from the seed topic
+    if not leaf_nodes:
+        queue = [(seed_topic, 0, depth)]  # Track the article, its depth, and max depth
+    else:
+        queue = leaf_nodes  # Resume from the last saved leaf nodes
+    
+    visited = set(existing_graph)  # Track visited nodes (including previously saved ones)
+    graph = []
+    new_topic_counter = {"count": 0}  # Dictionary to track the count of new topics
+    leaf_nodes = []  # Reset leaf nodes to capture new ones
+    
+    # Multithreading setup (using system core count for max workers)
+    num_workers = multiprocessing.cpu_count()
+    print(f"Using {num_workers} threads for parallel processing.")
+    
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        futures = []
+        
+        while queue and new_topic_counter["count"] < max_new_topics:
+            while queue and len(futures) < num_workers:  # Batch multiple articles to be processed at once
+                article_info = queue.pop(0)
+                futures.append(executor.submit(process_article, article_info, visited, graph, max_new_topics, queue, new_topic_counter, leaf_nodes))
+            
+            # Wait for the current batch of futures to complete
+            for future in as_completed(futures):
+                future.result()  # Ensure any exception is raised if it occurs within a thread
+
+            futures.clear()  # Clear completed futures
+
+            # Log progress after each batch
+            print(f"Processed {new_topic_counter['count']} new topics so far.")
+        
+        print(f"Finished processing. Total new topics found: {new_topic_counter['count']}")
+
+    # Save the graph data to CSV
+    with open(output_csv, mode='a', newline='', encoding='utf-8') as csv_file:
+        fieldnames = ['source', 'target']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        
+        # Write header only if the file is empty
+        if os.stat(output_csv).st_size == 0:
+            writer.writeheader()
+        
+        for edge in graph:
+            writer.writerow(edge)
+
+    print(f"Saved {len(graph)} edges to {output_csv}.")
+
+    # Save leaf nodes for future continuation
+    save_leaf_nodes(leaf_nodes, leaf_node_file)
+
 seed_topics = ["Technology", "Science", "Mathematics", "History"]
+
+# Set max_new_topics to ensure you want 10 for each topic
+max_new_topics_per_topic = 1000
 
 start_time = time.time()  # Track start time
 
 for topic in seed_topics:
     print(f"\nProcessing seed topic: {topic}")
-    build_topic_graph(seed_topic=topic, depth=3, max_new_topics=10000, output_csv="topics_combined.csv", output_json="topics_combined.json")
+    build_topic_graph(seed_topic=topic, depth=2, max_new_topics=max_new_topics_per_topic)
 
 end_time = time.time()  # Track end time
 
