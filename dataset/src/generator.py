@@ -190,6 +190,8 @@ def process_article(article_info, visited, graph, max_new_topics, queue, new_top
                 if new_topic_counter["count"] >= max_new_topics:
                     print("Reached the maximum number of new topics. Stopping...")
                     # Add the remaining topics as leaf nodes
+                    remaining_links = [link for link in valid_links if link not in visited]
+                    leaf_nodes.extend([(link, current_depth + 1, depth) for link in remaining_links])  # Add remaining links as leaf nodes
                     leaf_nodes.extend([(link, current_depth + 1, depth) for link in additional_links])  # Add additional links as leaf nodes
                     return
 
@@ -200,6 +202,7 @@ def process_article(article_info, visited, graph, max_new_topics, queue, new_top
 
         # Add additional links as leaf nodes
         leaf_nodes.extend([(link, current_depth + 1, depth) for link in additional_links])  # Ensure additional links match the tuple structure
+        # leaf_nodes.extend([(link, current_depth + 1, depth) for link in valid_links])  # Ensure additional links match the tuple structure
 
 # Function to build the graph from a seed topic and store in a single CSV/JSON
 def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topics_combined.csv"):
@@ -263,7 +266,8 @@ def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topic
     # Save leaf nodes for future continuation
     save_leaf_nodes(leaf_nodes, leaf_node_file)
 
-seed_topics = ["Technology", "Science", "Mathematics", "History", "Arts", "Humanities", "Philosophy", "Politics" ]
+# seed_topics = ["Technology", "Science", "Mathematics", "History", "Arts", "Humanities", "Philosophy", "Politics" ]
+seed_topics = ["Technology", "Science" ]
 
 # Set max_new_topics to ensure you want 10 for each topic
 max_new_topics_per_topic = 10000
