@@ -98,11 +98,13 @@ def load_existing_graph(output_csv):
     return existing_graph
 
 # Function to load previously saved leaf nodes
-def load_leaf_nodes(leaf_node_file):
+def load_leaf_nodes(leaf_node_file, depth):
     if os.path.exists(leaf_node_file):
         with open(leaf_node_file, 'r', encoding='utf-8') as file:
-            leaf_nodes = json.load(file)
-        print(f"Loaded {len(leaf_nodes)} leaf nodes from the file: {leaf_node_file}.")
+            leaf_node_titles = json.load(file)
+        # Create a list of tuples with {article_name, 0, depth}
+        leaf_nodes = [(title, 0, depth) for title in leaf_node_titles]
+        print(f"Loaded {len(leaf_node_titles)} leaf nodes from the file: {leaf_node_file}.")
         return leaf_nodes
     else:
         print("No leaf nodes found. Starting fresh.")
@@ -110,9 +112,11 @@ def load_leaf_nodes(leaf_node_file):
 
 # Function to save leaf nodes for future continuation
 def save_leaf_nodes(leaf_nodes, leaf_node_file):
+    # Extract just the article names for saving
+    leaf_node_titles = [node[0] for node in leaf_nodes]
     with open(leaf_node_file, 'w', encoding='utf-8') as file:
-        json.dump(leaf_nodes, file, indent=4)
-    print(f"Saved {len(leaf_nodes)} leaf nodes for future use in: {leaf_node_file}.")
+        json.dump(leaf_node_titles, file, indent=4)  # Save only titles
+    print(f"Saved {len(leaf_node_titles)} leaf nodes for future use in: {leaf_node_file}.")
 
 # Function to save edges in JSON format
 def save_edges_to_json(graph, json_file):
@@ -203,7 +207,7 @@ def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topic
     
     leaf_node_file = f"{LEAF_NODE_BASE}{seed_topic.replace(' ', '_')}.json"  # Unique file for each seed topic
     existing_graph = load_existing_graph(output_csv)  # Load existing data
-    leaf_nodes = load_leaf_nodes(leaf_node_file)  # Load previously saved leaf nodes (if any)
+    leaf_nodes = load_leaf_nodes(leaf_node_file, depth)  # Load previously saved leaf nodes (if any)
     
     # If there are no saved leaf nodes, start from the seed topic
     if not leaf_nodes:
@@ -259,16 +263,16 @@ def build_topic_graph(seed_topic, depth=2, max_new_topics=100, output_csv="topic
     # Save leaf nodes for future continuation
     save_leaf_nodes(leaf_nodes, leaf_node_file)
 
-seed_topics = ["Technology", "Science", "Mathematics", "History"]
+seed_topics = ["Technology", "Science", "Mathematics", "History", "Arts", "Humanities", "Philosophy", "Politics" ]
 
 # Set max_new_topics to ensure you want 10 for each topic
-max_new_topics_per_topic = 10
+max_new_topics_per_topic = 10000
 
 start_time = time.time()  # Track start time
 
 for topic in seed_topics:
     print(f"\nProcessing seed topic: {topic}")
-    build_topic_graph(seed_topic=topic, depth=2, max_new_topics=max_new_topics_per_topic)
+    build_topic_graph(seed_topic=topic, depth=1, max_new_topics=max_new_topics_per_topic)
 
 end_time = time.time()  # Track end time
 
