@@ -15,11 +15,14 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50 }) => {
 
   // Mouse down event to start dragging
   const handleMouseDown = (event: React.MouseEvent<SVGCircleElement>) => {
-    setIsDragging(true);
-    setInitialCoords({
-      x: event.clientX - node.xCoordinate,
-      y: event.clientY - node.yCoordinate,
-    });
+    // Only start dragging if the left mouse button is pressed
+    if (event.button === 0) {
+      setIsDragging(true);
+      setInitialCoords({
+        x: event.clientX - node.xCoordinate,
+        y: event.clientY - node.yCoordinate,
+      });
+    }
   };
 
   // Mouse move event to update node position
