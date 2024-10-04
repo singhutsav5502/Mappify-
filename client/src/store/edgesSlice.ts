@@ -5,7 +5,25 @@ import { nodeSlice } from "./nodesSlice";
 type EdgesInitialState = {
     edges: EdgeState[]
 }
-const initialState: EdgesInitialState = { edges: [] }
+const dummyEdges: EdgeState[] = [
+    {
+        _id: 1,
+        ends: [1, 2] // Connects Node 1 and Node 2
+    },
+    {
+        _id: 2,
+        ends: [1, 3] // Connects Node 1 and Node 3
+    },
+    {
+        _id: 3,
+        ends: [2, 3] // Connects Node 2 and Node 3
+    },
+    {
+        _id: 4,
+        ends: [3, 4] // Connects Node 3 and Node 4
+    }
+];
+const initialState: EdgesInitialState = { edges: dummyEdges }
 export const edgeSlice = createSlice({
     name: 'edges',
     initialState,

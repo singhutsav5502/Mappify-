@@ -2,8 +2,17 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-body{
   height: 100%;
+  font-family: monospace;
+}
+:root {
+  --bg-primary: #222; /* Dark background color */
+  --bg-node: #6e4d98; /* Light purple for node background */
+  --bg-edge: rgba(168, 168, 168, 0.267);  /* transparent grey */
+  --font-primary: #fdf6e3; /* Light cream/white for text */
+
+}
+body{
+  height: 100vh;
+  overflow:hidden ;
 }
