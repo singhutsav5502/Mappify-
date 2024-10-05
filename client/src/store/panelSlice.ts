@@ -15,7 +15,7 @@ type openPanelType = {
     yCoordinate: number;
 }
 export const sessionSlice = createSlice({
-    name: 'session',
+    name: 'panel',
     initialState,
     reducers: {
         openPanel: (state, action: PayloadAction<openPanelType>) => {

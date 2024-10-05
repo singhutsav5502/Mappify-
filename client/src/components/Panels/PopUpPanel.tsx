@@ -8,6 +8,7 @@ import {
 import styles from "../../styles/PopUpPanel.module.css";
 import { addEdge } from "../../store/edgesSlice";
 import { generateEdgeId, generateNodeId } from "../../utils/generators";
+import { closePanel } from "../../store/panelSlice";
 
 const PopUpPanel = () => {
   const dispatch = useAppDispatch();
@@ -64,7 +65,9 @@ const PopUpPanel = () => {
     <div className={styles.panel}>
       <div className={styles.header}>
         {isPropertyPanel ? <span>Properties</span> : <span>Add new Node</span>}
-        <div className={styles.redCircle}></div>
+        <div className={styles.redCircle} onClick={()=>{
+          dispatch(closePanel())
+        }}></div>
       </div>
 
       {!isPropertyPanel ? (

@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from "react";
 import { useAppDispatch } from "../../hooks/storeHooks";
-import { generateEdgeId, generateNodeId } from "../../utils/generators";
-import { updateNode, addNode } from "../../store/nodesSlice";
+import { generateEdgeId } from "../../utils/generators";
+import { updateNode } from "../../store/nodesSlice";
 import type { EdgeState, NodeState } from "../../types/storeTypes";
 import { addEdge } from "../../store/edgesSlice";
+import { openPanel } from "../../store/panelSlice";
 interface CircleProps {
   node: NodeState;
   radius?: number;
@@ -104,7 +105,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
           }
         } else {
           // Open panel to create a new node if no valid node is found
-          openNewNodePanel(currentMousePos.x, currentMousePos.y);
+          openNewNodePanel(currentMousePos.x, currentMousePos.y, false);
         }
         setNewEdgeID(null); // Reset newEdgeID after use
       }
@@ -113,26 +114,15 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
   );
 
   // Function to open panel for creating a new node
-  const openNewNodePanel = (x: number, y: number) => {
-    const newNodeName = prompt("Enter new node name:");
-    if (newNodeName && newEdgeID !== null) {
-      const newNodeId = generateNodeId(); // Generate random node _id
-      dispatch(
-        addNode({
-          _id: newNodeId,
-          name: newNodeName,
-          xCoordinate: x,
-          yCoordinate: y,
-        } as NodeState)
-      );
-      dispatch(
-        addEdge({
-          _id: newEdgeID, // Use the same prospective newEdgeID
-          ends: [node._id, newNodeId],
-        } as EdgeState)
-      );
-    }
-    setNewEdgeID(null); // Reset newEdgeID after use
+  const openNewNodePanel = (x: number, y: number, isPropertyPanel: boolean) => {
+    dispatch(
+      openPanel({
+        popUpPanelTriggeringNodeId: node._id,
+        isPropertyPanel,
+        xCoordinate: x,
+        yCoordinate: y,
+      })
+    );
   };
 
   // Add and remove mouse move and up events
@@ -148,6 +138,12 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
     };
   }, [isDraggingNode, isDraggingEdge, handleMouseMove, handleMouseUp]);
 
+  // Handle right-click (context menu) to open the property panel
+  const handleContextMenu = (event: React.MouseEvent<SVGCircleElement>) => {
+    event.preventDefault(); // Prevent default browser context menu
+    const svgCoords = getSvgCoords(event.clientX, event.clientY);
+    openNewNodePanel(svgCoords.x, svgCoords.y, true); // Open property panel
+  };
   return (
     <>
       {/* Node / Circle */}
@@ -159,6 +155,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
         stroke="var(--stroke-node)"
         strokeWidth={1}
         onMouseDown={handleMouseDown} // Trigger dragging or edge creation on mouse down
+        onContextMenu={handleContextMenu} // panel
         style={{ cursor: isDraggingEdge ? "crosshair" : "grab" }}
         data-node-id={node._id}
       />
