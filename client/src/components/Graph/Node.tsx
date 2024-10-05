@@ -4,7 +4,8 @@ import { generateEdgeId } from "../../utils/generators";
 import { updateNode } from "../../store/nodesSlice";
 import type { EdgeState, NodeState } from "../../types/storeTypes";
 import { addEdge } from "../../store/edgesSlice";
-import { openPanel } from "../../store/panelSlice";
+import { closePanel, openPanel } from "../../store/panelSlice";
+import { getScreenCoords, getSvgCoords } from "../../utils/coords";
 interface CircleProps {
   node: NodeState;
   radius?: number;
@@ -25,20 +26,6 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
   }>({ x: 0, y: 0 });
   const [newEdgeID, setNewEdgeID] = useState<string | null>(null); // State for prospective newEdgeID
 
-  // Helper to convert mouse coordinates to SVG coordinates
-  const getSvgCoords = (clientX: number, clientY: number) => {
-    if (!svgRef.current) return { x: clientX, y: clientY };
-    const point = svgRef.current.createSVGPoint();
-    point.x = clientX;
-    point.y = clientY;
-    const transformedPoint = point.matrixTransform(
-      svgRef.current.getScreenCTM()?.inverse()
-    );
-    return {
-      x: transformedPoint.x,
-      y: transformedPoint.y,
-    };
-  };
 
   // Mouse down event to start dragging a node or creating an edge
   const handleMouseDown = (event: React.MouseEvent<SVGCircleElement>) => {
@@ -47,7 +34,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
         // Start dragging an edge if Shift key is held
         setIsDraggingEdge(true);
         setNewEdgeID(generateEdgeId()); // Generate prospective newEdgeID
-        const svgCoords = getSvgCoords(event.clientX, event.clientY);
+        const svgCoords = getSvgCoords(event.clientX, event.clientY, svgRef);
         setCurrentMousePos({ x: svgCoords.x, y: svgCoords.y });
       } else {
         // Start dragging the node
@@ -70,7 +57,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
         // Dispatch the updated node with new coordinates
         dispatch(updateNode({ ...node, xCoordinate: newX, yCoordinate: newY }));
       } else if (isDraggingEdge) {
-        const svgCoords = getSvgCoords(event.clientX, event.clientY);
+        const svgCoords = getSvgCoords(event.clientX, event.clientY, svgRef);
         setCurrentMousePos({ x: svgCoords.x, y: svgCoords.y });
       }
     },
@@ -105,7 +92,8 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
           }
         } else {
           // Open panel to create a new node if no valid node is found
-          openNewNodePanel(currentMousePos.x, currentMousePos.y, false);
+          const screenSpaceCoords = getScreenCoords(currentMousePos.x , currentMousePos.y, svgRef)
+          openNewNodePanel(screenSpaceCoords.x, screenSpaceCoords.y, false);
         }
         setNewEdgeID(null); // Reset newEdgeID after use
       }
@@ -115,6 +103,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
 
   // Function to open panel for creating a new node
   const openNewNodePanel = (x: number, y: number, isPropertyPanel: boolean) => {
+    dispatch(closePanel())
     dispatch(
       openPanel({
         popUpPanelTriggeringNodeId: node._id,
@@ -141,8 +130,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
   // Handle right-click (context menu) to open the property panel
   const handleContextMenu = (event: React.MouseEvent<SVGCircleElement>) => {
     event.preventDefault(); // Prevent default browser context menu
-    const svgCoords = getSvgCoords(event.clientX, event.clientY);
-    openNewNodePanel(svgCoords.x, svgCoords.y, true); // Open property panel
+    openNewNodePanel(event.clientX, event.clientY, true); // Open property panel
   };
   return (
     <>

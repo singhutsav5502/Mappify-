@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import NodeRenderer from "./NodeRenderer";
 import EdgeRenderer from "./EdgeRenderer";
-
+import PopUpPanel from "../Panels/PopUpPanel";
+import { useAppSelector } from "../../hooks/storeHooks";
 export default function GraphRenderer() {
   const svgRef = useRef<SVGSVGElement | null>(null);
   // Local states for offset and zoom
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1); // Default zoom level
-
+  const popUpPanelDetails = useAppSelector((state) => state.panels);
   // Get viewport dimensions
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
@@ -67,6 +68,7 @@ export default function GraphRenderer() {
 
   return (
     <div style={{ position: "relative", height: "100%" }}>
+      {popUpPanelDetails.popUpPanelIsVisible && <PopUpPanel svgRef={svgRef} />}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="100%"
