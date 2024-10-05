@@ -39,6 +39,14 @@ const PopUpPanel = ({ svgRef }: popUpPanelProps) => {
   const [panelPos, setPanelPos] = useState({ x: xCoordinate, y: yCoordinate });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // Update newNodeValue whenever triggeringNode changes
+  useEffect(() => {
+    if ( triggeringNode) {
+      setNewNodeValue(triggeringNode.name);
+    } else {
+      setNewNodeValue(""); // Reset for adding new node
+    }
+  }, [triggeringNode, isPropertyPanel, triggeringNodeId]); // Dependencies
   // Handle panel dragging
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.button === 0) {
