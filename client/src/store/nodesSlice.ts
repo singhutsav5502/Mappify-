@@ -7,7 +7,7 @@ type NodesInitialState = {
 const dummyNodes: NodeState[] = [
   // Forest 1
   {
-    _id: 1,
+    _id: "1",
     name: "Node 1",
     suggestedNodes: [],
     xCoordinate: 200, // Spaced from the left
@@ -15,7 +15,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 2,
+    _id: "2",
     name: "Node 2",
     suggestedNodes: [],
     xCoordinate: 400, // Increased space
@@ -23,7 +23,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 3,
+    _id: "3",
     name: "Node 3",
     suggestedNodes: [],
     xCoordinate: 300, // Increased space
@@ -31,7 +31,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 4,
+    _id: "4",
     name: "Node 4",
     suggestedNodes: [],
     xCoordinate: 500, // Increased space
@@ -39,7 +39,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: true,
   },
   {
-    _id: 5,
+    _id: "5",
     name: "Node 5",
     suggestedNodes: [],
     xCoordinate: 250, // Increased space
@@ -47,7 +47,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 6,
+    _id: "6",
     name: "Node 6",
     suggestedNodes: [],
     xCoordinate: 450, // Increased space
@@ -55,7 +55,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 7,
+    _id: "7",
     name: "Node 7",
     suggestedNodes: [],
     xCoordinate: 600, // Increased space
@@ -63,7 +63,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 8,
+    _id: "8",
     name: "Node 8",
     suggestedNodes: [],
     xCoordinate: 200, // Increased space
@@ -73,7 +73,7 @@ const dummyNodes: NodeState[] = [
 
   // Forest 2
   {
-    _id: 9,
+    _id: "9",
     name: "Node 9",
     suggestedNodes: [],
     xCoordinate: 1000, // Far away from Forest 1
@@ -81,7 +81,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 10,
+    _id: "10",
     name: "Node 10",
     suggestedNodes: [],
     xCoordinate: 1200, // Increased space
@@ -89,7 +89,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 11,
+    _id: "11",
     name: "Node 11",
     suggestedNodes: [],
     xCoordinate: 1100, // Increased space
@@ -97,7 +97,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 12,
+    _id: "12",
     name: "Node 12",
     suggestedNodes: [],
     xCoordinate: 1300, // Increased space
@@ -105,7 +105,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: true,
   },
   {
-    _id: 13,
+    _id: "13",
     name: "Node 13",
     suggestedNodes: [],
     xCoordinate: 1000, // Increased space
@@ -113,7 +113,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 14,
+    _id: "14",
     name: "Node 14",
     suggestedNodes: [],
     xCoordinate: 1150, // Increased space
@@ -121,7 +121,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 15,
+    _id: "15",
     name: "Node 15",
     suggestedNodes: [],
     xCoordinate: 1200, // Increased space
@@ -129,7 +129,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 16,
+    _id: "16",
     name: "Node 16",
     suggestedNodes: [],
     xCoordinate: 1350, // Increased space
@@ -139,7 +139,7 @@ const dummyNodes: NodeState[] = [
 
   // Forest 3
   {
-    _id: 17,
+    _id: "17",
     name: "Node 17",
     suggestedNodes: [],
     xCoordinate: 1600, // Far away from Forest 2
@@ -147,7 +147,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 18,
+    _id: "18",
     name: "Node 18",
     suggestedNodes: [],
     xCoordinate: 1800, // Increased space
@@ -155,7 +155,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 19,
+    _id: "19",
     name: "Node 19",
     suggestedNodes: [],
     xCoordinate: 1700, // Increased space
@@ -163,7 +163,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 20,
+    _id: "20",
     name: "Node 20",
     suggestedNodes: [],
     xCoordinate: 1900, // Increased space
@@ -171,7 +171,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: true,
   },
   {
-    _id: 21,
+    _id: "21",
     name: "Node 21",
     suggestedNodes: [],
     xCoordinate: 1650, // Increased space
@@ -179,7 +179,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 22,
+    _id: "22",
     name: "Node 22",
     suggestedNodes: [],
     xCoordinate: 1725, // Increased space
@@ -187,7 +187,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 23,
+    _id: "23",
     name: "Node 23",
     suggestedNodes: [],
     xCoordinate: 1775, // Increased space
@@ -195,7 +195,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: false,
   },
   {
-    _id: 24,
+    _id: "24",
     name: "Node 24",
     suggestedNodes: [],
     xCoordinate: 1850, // Increased space
@@ -203,7 +203,7 @@ const dummyNodes: NodeState[] = [
     isIntermediate: true,
   },
   {
-    _id: 25,
+    _id: "25",
     name: "Node 25",
     suggestedNodes: [],
     xCoordinate: 1925, // Increased space

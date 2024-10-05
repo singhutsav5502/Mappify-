@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from "react";
 import { useAppDispatch } from "../../hooks/storeHooks";
+import { generateEdgeId, generateNodeId } from "../../utils/generators";
 import { updateNode, addNode } from "../../store/nodesSlice";
 import type { EdgeState, NodeState } from "../../types/storeTypes";
 import { addEdge } from "../../store/edgesSlice";
-
 interface CircleProps {
   node: NodeState;
   radius?: number;
@@ -22,7 +22,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
     x: number;
     y: number;
   }>({ x: 0, y: 0 });
-  const [newEdgeID, setNewEdgeID] = useState<number | null>(null); // State for prospective newEdgeID
+  const [newEdgeID, setNewEdgeID] = useState<string | null>(null); // State for prospective newEdgeID
 
   // Helper to convert mouse coordinates to SVG coordinates
   const getSvgCoords = (clientX: number, clientY: number) => {
@@ -45,7 +45,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
       if (event.shiftKey) {
         // Start dragging an edge if Shift key is held
         setIsDraggingEdge(true);
-        setNewEdgeID(Math.floor(Math.random() * 10000)); // Generate prospective newEdgeID
+        setNewEdgeID(generateEdgeId()); // Generate prospective newEdgeID
         const svgCoords = getSvgCoords(event.clientX, event.clientY);
         setCurrentMousePos({ x: svgCoords.x, y: svgCoords.y });
       } else {
@@ -82,7 +82,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
         setIsDraggingNode(false);
       } else if (isDraggingEdge) {
         setIsDraggingEdge(false);
-        
+
         const elements = document.elementsFromPoint(
           event.clientX,
           event.clientY
@@ -92,12 +92,12 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
         );
         // Check if the top element is another node
         if (topElement && topElement.tagName === "circle") {
-          const targetNodeId = Number(topElement.getAttribute("data-node-id"));
+          const targetNodeId = topElement.getAttribute("data-node-id");
           if (targetNodeId && newEdgeID !== null) {
             // Create an edge between nodes using the prospective newEdgeID
             dispatch(
               addEdge({
-                _id: newEdgeID, // Use the prospective newEdgeID
+                _id: newEdgeID, // Use the same prospective newEdgeID
                 ends: [node._id, targetNodeId],
               } as EdgeState)
             );
@@ -116,7 +116,7 @@ const Node: React.FC<CircleProps> = ({ node, radius = 50, svgRef }) => {
   const openNewNodePanel = (x: number, y: number) => {
     const newNodeName = prompt("Enter new node name:");
     if (newNodeName && newEdgeID !== null) {
-      const newNodeId = Math.floor(Math.random() * 10000); // Generate random node _id
+      const newNodeId = generateNodeId(); // Generate random node _id
       dispatch(
         addNode({
           _id: newNodeId,

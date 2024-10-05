@@ -6,7 +6,7 @@ export type AppDispatch = typeof store.dispatch
 // export type nodeID = number;
 
 export type NodeState = {
-    _id: number,
+    _id: string,
     name: string,
     suggestedNodes: NodeState[],
     xCoordinate: number,
@@ -16,8 +16,8 @@ export type NodeState = {
 
 // export type edgeID = number;
 export type EdgeState = {
-    _id: number,
-    ends: [number, number]
+    _id: string,
+    ends: [string, string]
 }
 
 export type SessionState ={

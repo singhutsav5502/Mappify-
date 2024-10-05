@@ -1,0 +1,84 @@
+.container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background-color: #333;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .panel {
+    width: 200px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #2c2c2c;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .redCircle {
+    width: 12px;
+    height: 12px;
+    background-color: red;
+    border-radius: 50%;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 10px;
+    background-color: #4d4d4d;
+    color: #fff;
+  }
+  
+  .suggestedConnections {
+    margin-bottom: 10px;
+  }
+  
+  .connectionList {
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    transition: max-height 0.3s ease;
+  }
+  
+  .connectionItem {
+    background-color: #444;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+  
+  .expandButton {
+    width: 100%;
+    padding: 8px;
+    background-color: #444;
+    border-radius: 5px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  .deleteButton {
+    width: 100%;
+    padding: 8px;
+    background-color: red;
+    border-radius: 5px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+  
