@@ -8,12 +8,16 @@ export type AppDispatch = typeof store.dispatch
 export type NodeState = {
     _id: string,
     name: string,
-    suggestedNodes: NodeState[],
+    suggestedNodes: string[],
     xCoordinate: number,
     yCoordinate: number,
     isIntermediate: boolean
 }
-
+export type NodeValueAndCoordinates = {
+    name: string,
+    xCoordinate: number,
+    yCoordinate: number,
+}
 // export type edgeID = number;
 export type EdgeState = {
     _id: string,

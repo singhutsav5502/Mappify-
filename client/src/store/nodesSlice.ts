@@ -1,9 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { NodeState } from "../types/storeTypes";
+import type { NodeState, NodeValueAndCoordinates } from "../types/storeTypes";
+import { generateNodeId } from "../utils/generators";
 
 type NodesInitialState = {
   nodes: NodeState[]
 }
+
 const dummyNodes: NodeState[] = [
   // Forest 1
   {
@@ -220,6 +222,11 @@ export const nodeSlice = createSlice({
     addNode: (state, action: PayloadAction<NodeState>) => {
       state.nodes = [...state.nodes, action.payload]
     },
+    addNodeByValAndCoord: (state, action: PayloadAction<NodeValueAndCoordinates>)=>{
+      const suggestions: string[] = []
+      const newNode: NodeState = { ...action.payload, _id: generateNodeId(), isIntermediate: false, suggestedNodes: suggestions }
+      state.nodes = [...state.nodes, newNode]
+    },
     removeNode: (state, action: PayloadAction<NodeState>) => {
       state.nodes = state.nodes.filter((node) => node._id !== action.payload._id)
     },
@@ -234,5 +241,5 @@ export const nodeSlice = createSlice({
   }
 })
 
-export const { addNode, removeNode, updateNode } = nodeSlice.actions
+export const { addNode, removeNode, updateNode, addNodeByValAndCoord } = nodeSlice.actions
 export default nodeSlice.reducer
