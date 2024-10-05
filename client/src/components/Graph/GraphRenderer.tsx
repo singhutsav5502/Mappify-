@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import NodeRenderer from "./NodeRenderer";
 import EdgeRenderer from "./EdgeRenderer";
 
 export default function GraphRenderer() {
+  const svgRef = useRef<SVGSVGElement | null>(null);
   // Local states for offset and zoom
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1); // Default zoom level
@@ -76,9 +77,10 @@ export default function GraphRenderer() {
         }}
         onMouseDown={handleMouseDown}
         viewBox={`${offset.x} ${offset.y} ${viewBoxWidth} ${viewBoxHeight}`} // Set viewBox based on pan and zoom
+        ref={svgRef}
       >
         <EdgeRenderer />
-        <NodeRenderer />
+        <NodeRenderer svgRef={svgRef} />
       </svg>
       <div
         style={{
