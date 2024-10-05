@@ -14,6 +14,7 @@ export type NodeState = {
     isIntermediate: boolean
 }
 export type NodeValueAndCoordinates = {
+    _id: string,
     name: string,
     xCoordinate: number,
     yCoordinate: number,
@@ -24,8 +25,16 @@ export type EdgeState = {
     ends: [string, string]
 }
 
-export type SessionState ={
-    _id?: string|null,
-    username?: string|null,
-    token?: string|null
+export type SessionState = {
+    _id?: string | null,
+    username?: string | null,
+    token?: string | null
+}
+
+export type PanelState = {
+    popUpPanelTriggeringNodeId: string | null,
+    popUpPanelIsVisible: boolean,
+    isPropertyPanel: boolean;
+    xCoordinate: number;
+    yCoordinate: number;
 }

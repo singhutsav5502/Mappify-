@@ -6,21 +6,19 @@ import {
   addNodeByValAndCoord,
 } from "../../store/nodesSlice";
 import styles from "../../styles/PopUpPanel.module.css";
+import { addEdge } from "../../store/edgesSlice";
+import { generateEdgeId, generateNodeId } from "../../utils/generators";
 
-type PopUpPanelProps = {
-  triggeringNodeId: string;
-  isPropertyPanel: boolean;
-  xCoordinate: number;
-  yCoordinate: number;
-};
-const PopUpPanel = ({
-  triggeringNodeId,
-  isPropertyPanel,
-  xCoordinate,
-  yCoordinate,
-}: PopUpPanelProps) => {
+const PopUpPanel = () => {
   const dispatch = useAppDispatch();
 
+  const {
+    popUpPanelTriggeringNodeId,
+    xCoordinate,
+    yCoordinate,
+    isPropertyPanel,
+  } = useAppSelector((state) => state.panels);
+  const triggeringNodeId = popUpPanelTriggeringNodeId;
   const triggeringNode = useAppSelector((state) => state.nodes.nodes).find(
     (node) => node._id === triggeringNodeId
   );
@@ -32,7 +30,19 @@ const PopUpPanel = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleAddNode = (value: string) => {
-    dispatch(addNodeByValAndCoord({ name: value, xCoordinate, yCoordinate }));
+    const newNodeId = generateNodeId();
+    dispatch(
+      addNodeByValAndCoord({
+        _id: newNodeId,
+        name: value,
+        xCoordinate,
+        yCoordinate,
+      })
+    );
+    if (triggeringNodeId)
+      dispatch(
+        addEdge({ _id: generateEdgeId(), ends: [triggeringNodeId, newNodeId] })
+      );
     setNewNodeValue(""); // Clear the input after dispatch
   };
 
@@ -45,9 +55,7 @@ const PopUpPanel = ({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter" && newNodeValue) {
       if (isPropertyPanel && triggeringNode)
-        dispatch(
-          updateNode({ ...triggeringNode, name: newNodeValue })
-        );
+        dispatch(updateNode({ ...triggeringNode, name: newNodeValue }));
       else handleAddNode(newNodeValue);
     }
   };

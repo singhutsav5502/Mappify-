@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { NodeState, NodeValueAndCoordinates } from "../types/storeTypes";
-import { generateNodeId } from "../utils/generators";
 
 type NodesInitialState = {
   nodes: NodeState[]
@@ -224,7 +223,7 @@ export const nodeSlice = createSlice({
     },
     addNodeByValAndCoord: (state, action: PayloadAction<NodeValueAndCoordinates>)=>{
       const suggestions: string[] = []
-      const newNode: NodeState = { ...action.payload, _id: generateNodeId(), isIntermediate: false, suggestedNodes: suggestions }
+      const newNode: NodeState = { ...action.payload, isIntermediate: false, suggestedNodes: suggestions }
       state.nodes = [...state.nodes, newNode]
     },
     removeNode: (state, action: PayloadAction<NodeState>) => {
