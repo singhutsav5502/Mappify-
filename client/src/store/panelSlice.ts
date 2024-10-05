@@ -19,9 +19,9 @@ export const sessionSlice = createSlice({
     initialState,
     reducers: {
         openPanel: (state, action: PayloadAction<openPanelType>) => {
-            state = {...action.payload, popUpPanelIsVisible:true};
+            return { ...state, ...action.payload, popUpPanelIsVisible: true };
         },
-        closePanel: (state)=>{
+        closePanel: (state) => {
             state.popUpPanelIsVisible = false;
             state.popUpPanelTriggeringNodeId = null
         }
