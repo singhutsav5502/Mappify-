@@ -16,11 +16,13 @@ export default function GraphRenderer() {
   // Mouse wheel zooming
   const handleWheel = useCallback(
     (event: WheelEvent) => {
-      event.preventDefault();
-      const zoomFactor = 0.001;
-      const newZoom = Math.max(0.1, zoom - event.deltaY * zoomFactor); // Inverted zoom direction
+      if (svgRef.current && svgRef.current.contains(event.target as Node)) {
+        event.preventDefault();
+        const zoomFactor = 0.001;
+        const newZoom = Math.max(0.1, zoom - event.deltaY * zoomFactor); // Inverted zoom direction
 
-      setZoom(newZoom);
+        setZoom(newZoom);
+      }
     },
     [zoom]
   );
@@ -67,62 +69,64 @@ export default function GraphRenderer() {
   const viewBoxHeight = viewportHeight / zoom;
 
   return (
-    <div style={{ position: "relative", height: "100%" }}>
+    <>
       {popUpPanelDetails.popUpPanelIsVisible && <PopUpPanel svgRef={svgRef} />}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="100%"
-        height="100%"
-        style={{
-          backgroundColor: "var(--bg-primary)",
-          height: "auto !important",
-        }}
-        onMouseDown={handleMouseDown}
-        viewBox={`${offset.x} ${offset.y} ${viewBoxWidth} ${viewBoxHeight}`} // Set viewBox based on pan and zoom
-        ref={svgRef}
-      >
-        <EdgeRenderer />
-        <NodeRenderer svgRef={svgRef} />
-      </svg>
-      <div
-        style={{
-          position: "absolute",
-          bottom: "10px",
-          right: "10px",
-          backgroundColor: "var(--bg-primary)",
-          borderRadius: "5px",
-          padding: "10px",
-          display: "flex",
-          flexDirection: "column",
-          zIndex: 10, // Make sure it is on top of the SVG
-        }}
-      >
-        <button
-          onClick={zoomIn}
+      <div style={{ position: "relative", height: "100%" }}>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="100%"
+          height="100%"
           style={{
-            backgroundColor: "transparent",
-            border: "none",
-            color: "var(--font-primary)",
-            cursor: "pointer",
-            fontSize: "18px",
-            marginBottom: "5px",
+            backgroundColor: "var(--bg-primary)",
+            height: "auto !important",
+          }}
+          onMouseDown={handleMouseDown}
+          viewBox={`${offset.x} ${offset.y} ${viewBoxWidth} ${viewBoxHeight}`} // Set viewBox based on pan and zoom
+          ref={svgRef}
+        >
+          <EdgeRenderer />
+          <NodeRenderer svgRef={svgRef} />
+        </svg>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "10px",
+            right: "10px",
+            backgroundColor: "var(--bg-primary)",
+            borderRadius: "5px",
+            padding: "10px",
+            display: "flex",
+            flexDirection: "column",
+            zIndex: 10, // Make sure it is on top of the SVG
           }}
         >
-          +
-        </button>
-        <button
-          onClick={zoomOut}
-          style={{
-            backgroundColor: "transparent",
-            border: "none",
-            color: "var(--font-primary)",
-            cursor: "pointer",
-            fontSize: "18px",
-          }}
-        >
-          -
-        </button>
+          <button
+            onClick={zoomIn}
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              color: "var(--font-primary)",
+              cursor: "pointer",
+              fontSize: "18px",
+              marginBottom: "5px",
+            }}
+          >
+            +
+          </button>
+          <button
+            onClick={zoomOut}
+            style={{
+              backgroundColor: "transparent",
+              border: "none",
+              color: "var(--font-primary)",
+              cursor: "pointer",
+              fontSize: "18px",
+            }}
+          >
+            -
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

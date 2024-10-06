@@ -206,7 +206,7 @@ const dummyNodes: NodeState[] = [
   {
     _id: "25",
     name: "Node 25",
-    suggestedNodes: ["jeadkajd" , "dajkldaldkj"],
+    suggestedNodes: ["jeadkajd" , "dajkldaldkj", "afafaf", "adadadad ", "adadad", "aosdnaodja", "adaldifofajdc"],
     xCoordinate: 1925, // Increased space
     yCoordinate: 250,
     isIntermediate: false,

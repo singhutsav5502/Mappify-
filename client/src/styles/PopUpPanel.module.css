@@ -10,15 +10,21 @@
   
   .panel {
     position: absolute;
+    z-index: 100;
     width: 200px;
-    padding: 10px;
-    border-radius: 10px;
+    /* padding: 10px; */
+    border-radius: 16px;
     background-color: #2c2c2c;
     color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border:1px solid #d0d0d0;
   }
   
   .header {
+    border: 1px solid #d0d0d0;
+    border-radius: 16px 16px 0px 0px;
+    width: 100%;
+    padding: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -36,7 +42,8 @@
   }
   
   .input {
-    width: 100%;
+    margin: 10px;
+    border-bottom: 1px solid #d0d0d0;
     padding: 8px;
     border-radius: 5px;
     border: none;
@@ -46,6 +53,7 @@
   }
   
   .suggestedConnections {
+    margin: 10px;
     margin-bottom: 10px;
   }
   
@@ -65,20 +73,22 @@
   }
   
   .expandButton {
+    /* margin: 10px; */
     width: 100%;
     padding: 8px;
     background-color: #444;
-    border-radius: 5px;
+    border-radius: 0px 0px 16px 16px;
     border: none;
     color: #fff;
     cursor: pointer;
   }
   
   .deleteButton {
+    /* margin: 10px; */
     width: 100%;
     padding: 8px;
     background-color: red;
-    border-radius: 5px;
+    border-radius: 0px 0px 16px 16px;
     border: none;
     color: #fff;
     cursor: pointer;
